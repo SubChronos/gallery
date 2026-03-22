@@ -1,0 +1,41 @@
+---
+import GalleryCard from '../components/GalleryCard.astro'
+
+import { getCollection } from 'astro:content';
+const gallery = await getCollection('gallery');
+---
+
+<section class="gallery my-10" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 90 }'>
+    {
+        gallery.map(painting => {
+            return (
+                <GalleryCard painting={painting}/>
+            )
+        })
+    }
+</section>
+
+
+<script is:inline src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+<script is:inline src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+
+<script is:inline>
+    // Usamos 'astro:page-load' en lugar de DOMContentLoaded por <ClientRouter />
+    document.addEventListener('astro:page-load', () => {
+        const grid = document.querySelector('.gallery');
+        
+        if (!grid) return;
+
+        // 1. Inicializamos Masonry indicando que usaremos porcentajes (percentPosition)
+        const msnry = new Masonry(grid, {
+            itemSelector: '.grid-item',
+            percentPosition: true,
+            transitionDuration: '0.3s'
+        });
+
+        // 2. MAGIA: Cada vez que cargue UNA imagen, recalculamos los espacios
+        imagesLoaded(grid).on('progress', function() {
+            msnry.layout();
+        });
+    });
+</script>
