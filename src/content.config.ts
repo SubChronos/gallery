@@ -8,11 +8,14 @@ const gallery = defineCollection({
 
   schema: z.object({
     title: z.string(),
-    author: z.string(),
-    imageHeroLarge: z.string(),
-    imageHeroSmall: z.string(),
+    year: z.number(),
+    source: z.url(),
+    artistName: z.string(),
+    artistImage: z.string(),
     imageGallery: z.string(),
     imageThumbnail: z.string(),
+    imageHeroSmall: z.string(),
+    imageHeroLarge: z.string(),
     }),
 });
 

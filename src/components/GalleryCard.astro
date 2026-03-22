@@ -7,10 +7,10 @@ interface Props {
 
 const { painting } = Astro.props
 ---
-<div class="grid-item relative align-bottom mb-10 w-full sm:w-1/2 lg:w-1/4 px-4">
-    <img src={painting.data.imageGallery} class="w-full block">
-    <div class="absolute bottom-0 left-0 p-10 items-end justify-center font-serif">
+<div class="relative mb-6 grid-item overflow-hidden">
+    <img src={painting.data.imageGallery} class="w-full h-full object-cover block" alt={`${painting.data.title} painting`} transition:name={`imagegallery-${painting.id}`}>
+    <div class="absolute bottom-0 left-0 p-10 pt-20 w-full items-end justify-center font-serif bg-linear-to-t from-black/80 to-black/0">
         <h1 class="text-3xl text-white">{painting.data.title}</h1>
-        <h2 class="text-xl text-zinc-400">{painting.data.author}</h2>
+        <h2 class="text-xl text-zinc-400">{painting.data.artistName}</h2>
     </div>
 </div>

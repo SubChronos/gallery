@@ -5,37 +5,111 @@ import { getCollection } from 'astro:content';
 const gallery = await getCollection('gallery');
 ---
 
-<section class="gallery my-10" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 90 }'>
+<section class="gallery m-5">
+    <div class="grid-sizer"></div>
     {
-        gallery.map(painting => {
-            return (
-                <GalleryCard painting={painting}/>
-            )
-        })
+        gallery.map(painting => (
+        <GalleryCard painting={painting}/>
+        ))
     }
 </section>
 
-
-<script is:inline src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
 <script is:inline src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+<script is:inline src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
 
 <script is:inline>
-    // Usamos 'astro:page-load' en lugar de DOMContentLoaded por <ClientRouter />
+    const grid = document.querySelector('.gallery');
+    
     document.addEventListener('astro:page-load', () => {
-        const grid = document.querySelector('.gallery');
-        
-        if (!grid) return;
+        if (grid) {
+            imagesLoaded(grid, () => {
+                const msnry = new Masonry(grid, {
+                    itemSelector: '.grid-item',
+                    columnWidth: '.grid-sizer',
+                    percentPosition: true,
+                    gutter: 20,
+                    horizontalOrder: true
+                });
 
-        // 1. Inicializamos Masonry indicando que usaremos porcentajes (percentPosition)
-        const msnry = new Masonry(grid, {
-            itemSelector: '.grid-item',
-            percentPosition: true,
-            transitionDuration: '0.3s'
-        });
+                // Función mágica para alinear la base
+                function alinearBase() {
+                    const items = msnry.getItemElements();
+                    if (items.length === 0) return;
 
-        // 2. MAGIA: Cada vez que cargue UNA imagen, recalculamos los espacios
-        imagesLoaded(grid).on('progress', function() {
-            msnry.layout();
-        });
+                    let columns = {};
+                    let maxBottom = 0;
+
+                    // 1. Encontrar la línea final (la columna más larga)
+                    items.forEach(item => {
+                        const bottom = item.offsetTop + item.offsetHeight;
+                        if (bottom > maxBottom) maxBottom = bottom;
+
+                        // Agrupar elementos por su columna (mirando su posición 'left')
+                        const leftPos = item.style.left;
+                        if (!columns[leftPos]) columns[leftPos] = [];
+                        columns[leftPos].push(item);
+                    });
+
+                    // 2. Estirar el último elemento de cada columna hasta la línea final
+                    Object.values(columns).forEach(colItems => {
+                        // Asegurarnos de coger el que está más abajo
+                        colItems.sort((a, b) => a.offsetTop - b.offsetTop);
+                        const lastItem = colItems[colItems.length - 1];
+                        
+                        // Asignar el nuevo alto exacto
+                        const newHeight = maxBottom - lastItem.offsetTop;
+                        lastItem.style.height = `${newHeight}px`;
+                    });
+                }
+
+                // Ejecutamos la función justo después de que Masonry posicione la cuadrícula
+                msnry.on('layoutComplete', alinearBase);
+                msnry.layout(); // Disparamos el cálculo inicial
+
+                // Truco: Si el usuario cambia el tamaño de la ventana (responsive), 
+                // reseteamos nuestras alturas forzadas y dejamos que recalcule
+                let resizeTimer;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        const items = msnry.getItemElements();
+                        items.forEach(item => item.style.height = ''); // Limpiar alturas previas
+                        msnry.layout(); // Masonry reordena y vuelve a llamar a alinearBase automáticamente
+                    }, 200); 
+                });
+            });
+        }
     });
 </script>
+
+<style>
+    /* 1columna */
+    .grid-sizer,
+    :global(.grid-item) {
+        width: 100%;
+    }
+
+    /* 2 columnas: 1 gutter de 20px (20 / 2 = 10px a restar por columna) */
+    @media (min-width: 640px) {
+        .grid-sizer,
+        :global(.grid-item) {
+        width: calc(50% - 10px); 
+        }
+    }
+
+    /* 3 columnas: 2 gutters de 20px = 40px (40 / 3 = 13.33px a restar) */
+    @media (min-width: 1024px) {
+        .grid-sizer,
+        :global(.grid-item) {
+        width: calc(33.333% - 13.33px);
+        }
+    }
+
+    /* 4 columnas: 3 gutters de 20px = 60px (60 / 4 = 15px a restar) */
+    @media (min-width: 1280px) {
+        .grid-sizer,
+        :global(.grid-item) {
+        width: calc(25% - 15px);
+        }
+    }
+</style>
