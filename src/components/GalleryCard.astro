@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 
 interface Props {
     painting: CollectionEntry<'gallery'>;
@@ -8,9 +9,11 @@ interface Props {
 const { painting } = Astro.props
 ---
 <div class="relative mb-6 grid-item overflow-hidden">
-    <img src={painting.data.imageGallery} class="w-full h-full object-cover block" alt={`${painting.data.title} painting`} transition:name={`imagegallery-${painting.id}`}>
-    <div class="absolute bottom-0 left-0 p-10 pt-20 w-full items-end justify-center font-serif bg-linear-to-t from-black/80 to-black/0">
-        <h1 class="text-3xl text-white">{painting.data.title}</h1>
-        <h2 class="text-xl text-zinc-400">{painting.data.artistName}</h2>
-    </div>
+    <a href={`/painting/${painting.id}`}>
+        <Image loading="eager" src={painting.data.imageGallery} class="w-full h-full object-cover block -z-1" alt={`${painting.data.title} painting`} transition:name={`imagegallery-${painting.id}`}/>
+        <div class="z-10 absolute bottom-0 left-0 p-10 pt-20 w-full items-end justify-center font-serif bg-linear-to-t from-black/80 to-black/0" transition:name={`textgallery-${painting.id}`} transition:animate="fade">
+            <h1 class="text-3xl text-white">{painting.data.title}</h1>
+            <h2 class="text-xl text-zinc-400">{painting.data.artistName}</h2>
+        </div>
+    </a>
 </div>

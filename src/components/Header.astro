@@ -1,8 +1,10 @@
 ---
+import logo from "../assets/general/logo.svg"
+import { Image } from 'astro:assets';
 ---
-<header class="flex flex-row p-10">
+<header class="flex flex-row p-10 shrink-0 w-full">
     <a href="/">
-        <h2 class="text-4xl font-serif font-extrabold tracking-wider">galleria.</h2>
+        <Image loading="eager" src={logo} alt="Galleria logo" class="w-40"/>
     </a>
     <a class="text-1xl ml-auto my-auto font-serif text-zinc-500 tracking-wider">START SLIDESHOW</a>
 </header>

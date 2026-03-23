@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import arrowLeft from "../../assets/general/icon-back-button.svg"
+import arrowRight from "../../assets/general/icon-next-button.svg"
+
+export async function getStaticPaths() {
+    const gallery = await getCollection("gallery");
+    return gallery.map((painting) =>({
+        params: { id: painting.id },
+        props: { painting }
+    }));
+}
+
+const { painting } = Astro.props
+---
+
+<Layout title={painting.data.title}>
+	<section class="flex flex-col xl:flex-row m-auto px-10 w-full xl:h-full justify-center">
+        <div class="flex flex-col md:flex-row mx-auto mt-10">
+            <Image loading="eager" src={painting.data.imageHeroLarge} alt={`${painting.data.title} painting`} class="shrink-0 mx-auto md:mx-0 w-8/9 md:w-130 h-auto object-contain" transition:name={`imagegallery-${painting.id}`}/>
+            <div class="flex flex-row md:flex-col w-full lg:w-1/3">
+                <div class="bg-white w-fit pr-10 md:pr-0 pl-20 pb-20 pt-5 -translate-y-10 xl:translate-y-0 -translate-x-20 flex flex-col gap-7" transition:name={`info-${painting.id}`} transition:animate="fade">
+                    <h1 class="text-6xl font-bold font-serif text-wrap max-w-110">{painting.data.title}</h1>
+                    <h2 class="text-xl font-serif text-zinc-600">{painting.data.artistName}</h2>
+                </div>
+                <Image class="w-40 mt-auto ml-15 pb-5 -translate-x-40 md:translate-x-0" loading="eager" src={painting.data.artistImage} alt={`${painting.data.artistName} picture`}/>
+            </div>
+        </div>
+        <div class="flex flex-col relative max-w-250 m-auto md:px-20 md:my-20">
+            <h3 class="absolute top-0 left-0 -translate-y-20 text-[140px] md:text-[200px] text-zinc-200 font-mono -z-1">{painting.data.year}</h3>
+            <p class="text-zinc-600 font-serif mt-10 md:mt-25 text-balance text-sm md:text-lg">{painting.body}</p>
+            <a class="text-zinc-600 underline font-serif my-5 text-lg" href={painting.data.source}>Go to source</a>
+        </div>
+    </section>
+    <hr class="w-8/9 mx-auto mt-auto">
+    <footer class="flex flex-row px-10 py-5">
+        <div class="flex flex-col">
+            <h1 class="text-xl font-bold font-serif text-wrap max-w-110">{painting.data.title}</h1>
+            <h2 class="text-xl font-serif text-zinc-600">{painting.data.artistName}</h2>
+        </div>
+        <div class="flex flex-row gap-8 ml-auto my-auto">
+            <Image src={arrowLeft} alt="Arrow Left" class="w-10 h-10"/>
+            <Image src={arrowRight} alt="Arrow Right" class="w-10 h-10"/>
+        </div>
+    </footer>
+</Layout>

@@ -18,9 +18,8 @@ const gallery = await getCollection('gallery');
 <script is:inline src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
 
 <script is:inline>
-    const grid = document.querySelector('.gallery');
-    
     document.addEventListener('astro:page-load', () => {
+        const grid = document.querySelector('.gallery');
         if (grid) {
             imagesLoaded(grid, () => {
                 const msnry = new Masonry(grid, {
@@ -39,32 +38,29 @@ const gallery = await getCollection('gallery');
                     let columns = {};
                     let maxBottom = 0;
 
-                    // 1. Encontrar la línea final (la columna más larga)
                     items.forEach(item => {
                         const bottom = item.offsetTop + item.offsetHeight;
                         if (bottom > maxBottom) maxBottom = bottom;
 
-                        // Agrupar elementos por su columna (mirando su posición 'left')
                         const leftPos = item.style.left;
                         if (!columns[leftPos]) columns[leftPos] = [];
                         columns[leftPos].push(item);
                     });
 
-                    // 2. Estirar el último elemento de cada columna hasta la línea final
                     Object.values(columns).forEach(colItems => {
-                        // Asegurarnos de coger el que está más abajo
                         colItems.sort((a, b) => a.offsetTop - b.offsetTop);
                         const lastItem = colItems[colItems.length - 1];
                         
-                        // Asignar el nuevo alto exacto
                         const newHeight = maxBottom - lastItem.offsetTop;
                         lastItem.style.height = `${newHeight}px`;
                     });
+                    
+                    // NUEVO: Una vez que todo está alineado, hacemos visible la galería
+                    grid.classList.add('visible'); 
                 }
 
-                // Ejecutamos la función justo después de que Masonry posicione la cuadrícula
                 msnry.on('layoutComplete', alinearBase);
-                msnry.layout(); // Disparamos el cálculo inicial
+                msnry.layout();
 
                 // Truco: Si el usuario cambia el tamaño de la ventana (responsive), 
                 // reseteamos nuestras alturas forzadas y dejamos que recalcule
